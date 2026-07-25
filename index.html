@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AP EAPCET College Predictor — 2024 vs 2025 | Phinerd</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600;6..72,700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+--ink:#1B2A4A;
+--ink-soft:#41527A;
+--paper:#FAF9F5;
+--paper-dim:#F1EFE7;
+--line:#DAD5C6;
+--gold:#B8862E;
+--gold-soft:#E9D6A8;
+--safe:#2F6B4F;
+--safe-bg:#E4F1EA;
+--mod:#8A6D1D;
+--mod-bg:#FBF0D6;
+--reach:#9C3B2E;
+--reach-bg:#F8E6E2;
+--top:#6B3FA0;
+--top-bg:#EEE6F7;
+--mono: 'Inter', system-ui, sans-serif;
+--serif: 'Newsreader', Georgia, serif;
+}
+*{box-sizing:border-box;}
+body{ margin:0; background:var(--paper); color:var(--ink); font-family:var(--mono); -webkit-font-smoothing:antialiased; }
+.wrap{ max-width:1180px; margin:0 auto; padding:40px 28px 90px; }
+header.hero{ display:flex; flex-direction:column; gap:6px; padding-bottom:28px; border-bottom:1px solid var(--line); margin-bottom:28px; position:relative; }
+.eyebrow{ font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); font-weight:700; }
+.brand-bar{ display:flex; align-items:center; gap:9px; margin-bottom:16px; }
+.brand-bar img{ width:26px; height:26px; border-radius:6px; display:block; }
+.brand-bar span{ font-family:var(--serif); font-style:italic; font-weight:600; font-size:15px; color:var(--ink); letter-spacing:.01em; }
+.site-footer-credit{
+margin-top:26px; padding-top:16px; border-top:1px solid var(--line);
+display:flex; align-items:center; gap:8px; font-size:11.5px; color:var(--ink-soft);
+}
+.site-footer-credit img{ width:18px; height:18px; border-radius:4px; }
+h1{ font-family:var(--serif); font-weight:600; font-size:clamp(30px,4vw,44px); margin:2px 0 4px; letter-spacing:-0.01em; }
+h1 em{ font-style:italic; color:var(--gold); }
+.sub{ color:var(--ink-soft); font-size:15px; max-width:640px; line-height:1.5; }
+.data-status{
+position:absolute; right:0; top:0; font-size:12px; color:var(--ink-soft);
+text-align:right; line-height:1.5; border:1px solid var(--gold-soft); padding:8px 14px;
+border-radius:2px; background:var(--paper-dim); max-width:260px;
+}
+.data-status b{ color:var(--ink); display:block; font-family:var(--serif); font-style:italic; font-size:13px; margin-bottom:2px;}
+.data-status a{ color:var(--gold); font-weight:700; cursor:pointer; text-decoration:none; border-bottom:1px dotted var(--gold); }
+.panel{ background:#fff; border:1px solid var(--line); border-radius:6px; padding:24px; margin-bottom:26px; box-shadow:0 1px 0 rgba(27,42,74,.03); }
+.panel-title{ font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-soft); font-weight:700; margin-bottom:16px; }
+.grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:16px; align-items:end; }
+.field label{ display:block; font-size:12px; font-weight:600; color:var(--ink-soft); margin-bottom:6px; }
+.field input[type=number], .field input[type=text], .field select{
+width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:4px;
+background:var(--paper); color:var(--ink); font-family:var(--mono); font-size:14px; font-weight:500;
+}
+.field input:focus, .field select:focus{ outline:2px solid var(--gold); outline-offset:1px; background:#fff; }
+.toggle-row{ display:flex; gap:8px; }
+.toggle-row button{ flex:1; padding:10px 8px; border:1px solid var(--line); background:var(--paper); border-radius:4px; font-family:var(--mono); font-size:13px; font-weight:600; color:var(--ink-soft); cursor:pointer; }
+.toggle-row button.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
+.adv-toggle{ margin-top:16px; font-size:12.5px; color:var(--gold); font-weight:700; cursor:pointer; display:inline-block; border-bottom:1px dotted var(--gold); }
+.adv-fields{ display:none; margin-top:16px; padding-top:16px; border-top:1px dashed var(--line); }
+.adv-fields.open{ display:grid; }
+.summary-bar{ display:flex; gap:18px; flex-wrap:wrap; margin-bottom:18px; font-size:13px; color:var(--ink-soft); align-items:center; }
+.summary-bar b{ color:var(--ink); }
+.legend{ display:flex; gap:14px; flex-wrap:wrap; font-size:12px; margin-left:auto; }
+.print-btn{
+background:#fff; color:var(--ink); border:1px solid var(--line); padding:7px 14px; border-radius:4px;
+font-family:var(--mono); font-weight:700; font-size:12.5px; cursor:pointer; display:inline-flex;
+align-items:center; gap:6px; white-space:nowrap;
+}
+.print-btn:hover{ border-color:var(--gold); color:var(--gold); }
+.print-summary{ display:none; }
+@media print{
+body{ background:#fff; }
+.data-status, .panel, footer.note, .print-btn, .section-toolbar, .dot{ display:none !important; }
+details.tier-section summary.section-head{ cursor:default; }
+details.tier-section summary.section-head .chevron{ display:none; }
+.wrap{ max-width:100%; padding:10px; }
+.print-summary{ display:block; font-size:13px; color:var(--ink-soft); margin-bottom:14px; }
+table{ break-inside:auto; }
+tr{ break-inside:avoid; }
+details.tier-section{ break-inside:avoid-page; }
+}
+.dot{ display:inline-block; width:9px;height:9px; border-radius:50%; margin-right:5px; }
+.section-head{ display:flex; align-items:baseline; gap:10px; margin:30px 0 12px; }
+.section-head h2{ font-family:var(--serif); font-size:20px; font-weight:600; margin:0; }
+.section-head .count{ font-size:12px; color:var(--ink-soft); background:var(--paper-dim); padding:2px 9px; border-radius:20px; }
+.section-note{ font-size:12.5px; color:var(--ink-soft); margin-bottom:10px; }
+details.tier-section{ margin:30px 0 12px; }
+details.tier-section summary.section-head{
+cursor:pointer; list-style:none; margin:0 0 4px; user-select:none;
+}
+details.tier-section summary.section-head::-webkit-details-marker{ display:none; }
+details.tier-section summary.section-head .chevron{
+font-size:11px; color:var(--ink-soft); transition:transform .15s; margin-left:auto;
+}
+details.tier-section[open] summary.section-head .chevron{ transform:rotate(90deg); }
+.section-toolbar{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:10px; }
+.tier-sort-field{ display:flex; align-items:center; gap:8px; font-size:12px; color:var(--ink-soft); }
+.tier-sort-field select{
+padding:6px 10px; border:1px solid var(--line); border-radius:4px; background:#fff;
+color:var(--ink); font-family:var(--mono); font-size:12.5px; font-weight:600;
+}
+table{ width:100%; border-collapse:collapse; background:#fff; border:1px solid var(--line); border-radius:6px; overflow:hidden; font-size:13.5px; }
+thead th{ text-align:left; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); background:var(--paper-dim); padding:10px 12px; font-weight:700; white-space:nowrap; }
+tbody tr{ border-top:1px solid var(--line); }
+tbody tr:hover{ background:#FCFBF7; }
+tbody td{ padding:10px 12px; vertical-align:top; }
+.inst-name{ font-weight:600; color:var(--ink); }
+.code-pill{
+display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.02em;
+background:var(--ink); color:#fff; padding:1px 7px; border-radius:3px; margin-right:6px; vertical-align:middle;
+}
+.inst-meta{ font-size:11.5px; color:var(--ink-soft); margin-top:3px; }
+.region-pill{
+display:inline-block; font-size:10px; font-weight:700; border:1px solid var(--gold-soft);
+color:var(--gold); background:#FDF8ED; padding:1px 6px; border-radius:20px; margin-right:5px;
+}
+.branch-pill{ display:inline-block; font-size:11px; font-weight:700; background:var(--paper-dim); border:1px solid var(--line); padding:2px 8px; border-radius:20px; }
+.rank-num{ font-variant-numeric:tabular-nums; font-weight:600; }
+.trend{ font-size:11.5px; font-weight:700; }
+.trend.up{ color:var(--reach); }
+.trend.down{ color:var(--safe); }
+.trend.flat{ color:var(--ink-soft); }
+.tag{ display:inline-block; font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; white-space:nowrap; }
+.tag.safe{ background:var(--safe-bg); color:var(--safe); }
+.tag.mod{ background:var(--mod-bg); color:var(--mod); }
+.tag.reach{ background:var(--reach-bg); color:var(--reach); }
+.tag.top{ background:var(--top-bg); color:var(--top); }
+.proj{ font-size:12px; color:var(--ink-soft); }
+.empty{ text-align:center; padding:60px 20px; color:var(--ink-soft); }
+.empty .big{ font-family:var(--serif); font-style:italic; font-size:22px; color:var(--ink); margin-bottom:6px; }
+footer.note{ margin-top:40px; font-size:12px; color:var(--ink-soft); line-height:1.6; border-top:1px solid var(--line); padding-top:16px; }
+.cta-init{ text-align:center; padding:70px 20px; color:var(--ink-soft); }
+.cta-init .big{ font-family:var(--serif); font-size:26px; font-style:italic; color:var(--ink); margin-bottom:8px; }
+/* Upload screen */
+.upload-screen{ background:#fff; border:1px solid var(--line); border-radius:6px; padding:40px; text-align:center; }
+.upload-screen .big{ font-family:var(--serif); font-size:26px; font-style:italic; margin-bottom:10px; }
+.upload-screen p{ color:var(--ink-soft); font-size:14px; max-width:560px; margin:0 auto 28px; line-height:1.6; }
+.upload-grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; max-width:640px; margin:0 auto 24px; }
+.drop{
+border:2px dashed var(--line); border-radius:6px; padding:26px 16px; cursor:pointer;
+transition:.15s; background:var(--paper);
+}
+.drop:hover, .drop.drag{ border-color:var(--gold); background:var(--paper-dim); }
+.drop .label{ font-weight:700; font-size:13px; margin-bottom:4px; }
+.drop .file{ font-size:12px; color:var(--ink-soft); word-break:break-all; }
+.drop .hint{ font-size:11px; color:var(--ink-soft); margin-top:6px; }
+.drop input{ display:none; }
+.primary-btn{
+background:var(--ink); color:#fff; border:none; padding:12px 28px; border-radius:4px;
+font-family:var(--mono); font-weight:700; font-size:14px; cursor:pointer;
+}
+.primary-btn:disabled{ background:var(--line); color:var(--ink-soft); cursor:not-allowed; }
+.status-line{ margin-top:16px; font-size:13px; color:var(--ink-soft); min-height:18px; }
+.status-line.err{ color:var(--reach); font-weight:600; }
+.status-line.ok{ color:var(--safe); font-weight:600; }
+@media (max-width:700px){
+table, thead, tbody, tr, th, td{ display:block; }
+thead{ display:none; }
+tbody tr{ padding:12px; border:1px solid var(--line); border-radius:6px; margin-bottom:10px; }
+tbody td{ padding:4px 0; }
+tbody td::before{ content: attr(data-label); font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); display:block; font-weight:700; }
+.data-status{ position:static; margin-top:14px; display:inline-block; max-width:none; }
+.upload-grid{ grid-template-columns:1fr; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="eyebrow">AP EAPCET · Engineering &amp; Pharmacy Admissions</span>
+<h2>Where can your <em>rank</em> take you?</h2>
+<h6>Enter your EAPCET rank and category. This checks it against every college &amp; branch's actual 2024 and 2025 closing ranks, so you can see where you'd realistically have gotten a seat — and where the cutoff is moving.</h6>
+<div class="data-status" id="dataStatus">Loading…</div>
+<div id="loadingScreen" class="upload-screen" style="display:none;">
+<div class="big" id="loadingBig">Loading the official rank files…</div>
+<p id="loadingText">Reading <code>AP EAPCET 2024</code> and <code> AP EAPCET 2025</code> straight from the site — nothing is pre-baked, no upload needed.</p>
+<div class="status-line" id="statusLine"></div>
+</div>
+<div id="mainApp" style="display:none;">
+<div class="panel">
+<div class="panel-title">Your details</div>
+<div class="grid">
+<div class="field">
+<label for="rankInput">Your EAPCET rank</label>
+<input type="number" id="rankInput" placeholder="e.g. 42000" min="1">
+</div>
+<div class="field">
+<label for="catSelect">Category</label>
+<select id="catSelect">
+<option value="OC">OC</option>
+<option value="EWS">OC — EWS</option>
+<option value="BCA">BC‑A</option>
+<option value="BCB">BC‑B</option>
+<option value="BCC">BC‑C</option>
+<option value="BCD">BC‑D</option>
+<option value="BCE">BC‑E</option>
+<option value="SC">SC (2024 basis)</option>
+<option value="SC-I">SC Group‑I (2025)</option>
+<option value="SC-II">SC Group‑II (2025)</option>
+<option value="SC-III">SC Group‑III (2025)</option>
+<option value="ST">ST</option>
+</select>
+</div>
+<div class="field">
+<label>Gender</label>
+<div class="toggle-row" id="genderToggle">
+<button data-g="b" class="active">Boys</button>
+<button data-g="g">Girls</button>
+</div>
+</div>
+<div class="field">
+<label for="regionSelect">Region</label>
+<select id="regionSelect"><option value="">All regions</option></select>
+</div>
+</div>
+<span class="adv-toggle" id="advToggle">+ Filter by branch, district or institute</span>
+<div class="adv-fields grid" id="advFields">
+<div class="field">
+<label for="branchSelect">Branch</label>
+<select id="branchSelect"><option value="">All branches</option></select>
+</div>
+<div class="field">
+<label for="distSelect">District</label>
+<select id="distSelect"><option value="">All districts</option></select>
+</div>
+<div class="field">
+<label for="typeSelect">Institution type</label>
+<select id="typeSelect"><option value="">All types</option></select>
+</div>
+<div class="field">
+<label for="nameSearch">Institute name or EAPCET code</label>
+<input type="text" id="nameSearch" placeholder="e.g. Vignan, JNTU, or ABRK">
+</div>
+<div class="field">
+<label for="rangeInput">Top-tier window (ranks below yours)</label>
+<input type="number" id="rangeInput" value="3000" min="0" step="500">
+</div>
+</div>
+</div>
+<div id="results"></div>
+<footer class="note">
+<b>How the estimate works:</b> a college/branch is <span class="tag top" style="padding:1px 7px;">Top tier</span> if its 2024 or 2025 closing rank fell within your chosen window just below your rank (e.g. rank 10,000 with a 3,000 window flags closing ranks 7,000–10,000) — these are shown ahead of everything else as your closest, most realistic matches. Otherwise it's <span class="tag safe" style="padding:1px 7px;">Safe</span> if your rank is comfortably better than its 2025 closing rank, <span class="tag mod" style="padding:1px 7px;">Good chance</span> if you're inside the 2025 closing rank with some margin, and <span class="tag reach" style="padding:1px 7px;">Reach</span> if you're right at or just past it — worth trying since ranks shift year to year. The "2026 est." column is a simple straight-line projection from the 2024→2025 move, not an official prediction. <b>Region</b> (AU / SVU / SW) is the institute's affiliating region, relevant to local-area reservation — it doesn't itself change your eligibility, only which local-area quota you'd fall under. SC 2024 figures reflect the pre-subclassification single SC category, so they aren't directly comparable to the 2025 SC Group I/II/III columns. Always cross-check against the official APEAPCET counselling notification before finalizing choices.
+<div style="margin-top:10px;"><a href="#" id="resetLink" style="color:var(--gold); font-weight:700; cursor:pointer;">Reload the source files from /data</a></div>
+</footer>
+</div>
+</div>
+<script>
+/* ===================== 1. FILE PARSING ===================== */
+function normHeader(h){
+return String(h==null?'':h).toUpperCase().replace(/[^A-Z]/g,'');
+}
+function toNum(v){
+if(v===null || v===undefined || v==='') return null;
+const n = typeof v === 'number' ? v : parseFloat(String(v).replace(/[^0-9.\-]/g,''));
+return isNaN(n) ? null : Math.round(n);
+}
+// candidate normalized header names for each logical field
+const FIELD_CANDIDATES = {
+instCode: ['INSTCODE'],
+instName: ['NAMEOFTHEINSTITUTION','INSTNAME'],
+type: ['TYPE'],
+dist: ['DIST'],
+region: ['INSTREG'],
+place: ['PLACE'],
+branch: ['BRANCHCODE']
+};
+// category -> normalized header names to look for
+const CAT_FIELDS = {
+OC: {b:'OCBOYS', g:'OCGIRLS'},
+EWS: {b:'OCEWSBOYS', g:'OCEWSGIRLS'},
+ST: {b:'STBOYS', g:'STGIRLS'},
+BCA: {b:'BCABOYS', g:'BCAGIRLS'},
+BCB: {b:'BCBBOYS', g:'BCBGIRLS'},
+BCC: {b:'BCCBOYS', g:'BCCGIRLS'},
+BCD: {b:'BCDBOYS', g:'BCDGIRLS'},
+BCE: {b:'BCEBOYS', g:'BCEGIRLS'},
+SC: {b:'SCBOYS', g:'SCGIRLS'},
+'SC-I': {b:'SCIBOYS', g:'SCIGIRLS'},
+'SC-II': {b:'SCIIBOYS', g:'SCIIGIRLS'},
+'SC-III': {b:'SCIIIBOYS', g:'SCIIIGIRLS'}
+};
+function pickDataSheet(workbook){
+let best = null, bestRows = -1;
+workbook.SheetNames.forEach(name=>{
+const ws = workbook.Sheets[name];
+const rows = XLSX.utils.sheet_to_json(ws, {header:1, raw:true, defval:null});
+if(rows.length > bestRows){ bestRows = rows.length; best = {name, rows}; }
+});
+return best.rows;
+}
+function findHeaderRowIndex(rows){
+for(let i=0;i<Math.min(6,rows.length);i++){
+const row = rows[i] || [];
+const normed = row.map(normHeader);
+const nonEmpty = row.filter(c=>c!==null && String(c).trim()!=='').length;
+if(nonEmpty>5 && (normed.includes('SNO') || normed.includes('INSTCODE') || normed.includes('BRANCHCODE'))){
+return i;
+}
+}
+return 1; // fallback: assume title row + header row
+}
+function buildColumnIndex(headerRow){
+const normed = headerRow.map(normHeader);
+const idx = {};
+Object.keys(FIELD_CANDIDATES).forEach(field=>{
+for(const cand of FIELD_CANDIDATES[field]){
+const i = normed.indexOf(cand);
+if(i>=0){ idx[field]=i; break; }
+}
+});
+const catIdx = {};
+Object.keys(CAT_FIELDS).forEach(cat=>{
+const {b,g} = CAT_FIELDS[cat];
+const bi = normed.indexOf(b), gi = normed.indexOf(g);
+if(bi>=0 || gi>=0) catIdx[cat] = {b:bi, g:gi};
+});
+return {idx, catIdx};
+}
+function parseSheetToRecords(rows){
+const headerRowIdx = findHeaderRowIndex(rows);
+const headerRow = rows[headerRowIdx];
+const {idx, catIdx} = buildColumnIndex(headerRow);
+const dataRows = rows.slice(headerRowIdx+1);
+const out = [];
+dataRows.forEach(r=>{
+if(!r || r.length===0) return;
+const instCode = idx.instCode!=null ? r[idx.instCode] : null;
+const branch = idx.branch!=null ? r[idx.branch] : null;
+if(!instCode || !branch) return;
+const rec = {
+ic: String(instCode).trim(),
+nm: idx.instName!=null ? String(r[idx.instName]||'').trim() : '',
+ty: idx.type!=null ? String(r[idx.type]||'').trim() : '',
+ds: idx.dist!=null ? String(r[idx.dist]||'').trim() : '',
+rg: idx.region!=null ? String(r[idx.region]||'').trim() : '',
+pl: idx.place!=null ? String(r[idx.place]||'').trim() : '',
+br: String(branch).trim(),
+cats: {}
+};
+let nn = 0;
+Object.keys(catIdx).forEach(cat=>{
+const {b,g} = catIdx[cat];
+const bv = b>=0 ? toNum(r[b]) : null;
+const gv = g>=0 ? toNum(r[g]) : null;
+rec.cats[cat] = {b:bv, g:gv};
+if(bv!=null) nn++;
+if(gv!=null) nn++;
+});
+rec._nn = nn;
+out.push(rec);
+});
+// dedupe by inst_code + branch, keep row with most non-null category values
+const map = new Map();
+out.forEach(rec=>{
+const key = rec.ic + '|' + rec.br;
+const existing = map.get(key);
+if(!existing || rec._nn > existing._nn) map.set(key, rec);
+});
+return [...map.values()];
+}
+function mergeYears(recs24, recs25){
+const idx24 = new Map(recs24.map(r=>[r.ic+'|'+r.br, r]));
+const idx25 = new Map(recs25.map(r=>[r.ic+'|'+r.br, r]));
+const allKeys = new Set([...idx24.keys(), ...idx25.keys()]);
+const merged = [];
+allKeys.forEach(key=>{
+const a = idx24.get(key), b = idx25.get(key);
+const base = b || a;
+const [ic, br] = key.split('|');
+const cats = {};
+const allCatNames = new Set([...Object.keys(CAT_FIELDS)]);
+allCatNames.forEach(cat=>{
+const ca = a ? a.cats[cat] : null;
+const cb = b ? b.cats[cat] : null;
+const entry = {
+b24: ca ? ca.b : null, g24: ca ? ca.g : null,
+b25: cb ? cb.b : null, g25: cb ? cb.g : null
+};
+if(entry.b24!=null || entry.g24!=null || entry.b25!=null || entry.g25!=null){
+cats[cat] = entry;
+}
+});
+if(Object.keys(cats).length===0) return;
+merged.push({
+ic, br,
+nm: (b && b.nm) || (a && a.nm) || ic,
+ty: (b && b.ty) || (a && a.ty) || '',
+ds: (b && b.ds) || (a && a.ds) || '',
+rg: (b && b.rg) || (a && a.rg) || '',
+pl: (a && a.pl) || (b && b.pl) || '',
+c: cats
+});
+});
+return merged;
+}
+async function readWorkbookFromArrayBuffer(buf){
+return XLSX.read(buf, {type:'array', cellDates:false});
+}
+async function fetchArrayBuffer(path){
+const res = await fetch(encodeURI(path), {cache:'no-store'});
+if(!res.ok) throw new Error(`Could not fetch "${path}" (HTTP ${res.status}). Make sure the file exists in the /data folder next to this page.`);
+return res.arrayBuffer();
+}
+/* ===================== 2. DATA SOURCE: fixed files in /data, no upload ===================== */
+const DATA_DIR = '';
+const FILE_2024 = 'https://docs.google.com/spreadsheets/d/1BkWmsvS617gIyej5fab9fYfmJw7V_b38/export?format=xlsx';
+const FILE_2025 = 'https://docs.google.com/spreadsheets/d/1OdK_oSUgqPnuuadjKjl7ch_Gj6hD22ij/export?format=xlsx';
+let RAW = null;
+const loadingScreen = document.getElementById('loadingScreen');
+const mainApp = document.getElementById('mainApp');
+const dataStatus = document.getElementById('dataStatus');
+const statusLine = document.getElementById('statusLine');
+const loadingBig = document.getElementById('loadingBig');
+const loadingText = document.getElementById('loadingText');
+document.getElementById('resetLink').addEventListener('click', (e)=>{
+e.preventDefault();
+RAW = null;
+mainApp.style.display = 'none';
+loadingScreen.style.display = 'block';
+loadingBig.textContent = 'Reloading the official rank files…';
+loadingText.innerHTML = `Reading the 2024 and 2025 rank files from Google Drive.`;
+statusLine.className = 'status-line';
+statusLine.textContent = '';
+loadData();
+});
+/* ===================== 3. STARTUP: load straight from /data ===================== */
+async function loadData(){
+loadingScreen.style.display = 'block';
+mainApp.style.display = 'none';
+statusLine.className = 'status-line';
+statusLine.textContent = 'Reading workbooks from /data…';
+try{
+const [buf24, buf25] = await Promise.all([
+fetchArrayBuffer(DATA_DIR + FILE_2024),
+fetchArrayBuffer(DATA_DIR + FILE_2025)
+]);
+statusLine.textContent = 'Parsing rows…';
+const [wb24, wb25] = await Promise.all([readWorkbookFromArrayBuffer(buf24), readWorkbookFromArrayBuffer(buf25)]);
+const rows24 = pickDataSheet(wb24);
+const rows25 = pickDataSheet(wb25);
+const recs24 = parseSheetToRecords(rows24);
+const recs25 = parseSheetToRecords(rows25);
+if(recs24.length===0 || recs25.length===0){
+throw new Error('Could not find rank data rows in one of the files — check the file format.');
+}
+statusLine.textContent = 'Merging years…';
+const merged = mergeYears(recs24, recs25);
+RAW = merged;
+const meta = {file24: FILE_2024, file25: FILE_2025, count: merged.length};
+statusLine.className = 'status-line ok';
+statusLine.textContent = `Loaded ${merged.length} college–branch combinations.`;
+initFiltersAndShowApp(meta);
+}catch(err){
+console.error(err);
+statusLine.className = 'status-line err';
+statusLine.textContent = 'Could not load data: ' + err.message;
+loadingBig.textContent = 'Could not load the rank files';
+dataStatus.innerHTML = '<b>No data loaded</b>Check the /data folder';
+}
+}
+loadData();
+/* ===================== 4. MAIN APP (same predictor logic as before) ===================== */
+const BRANCH_NAMES = {
+AGR:'Agricultural Engineering', AI:'Artificial Intelligence', AID:'Artificial Intelligence & Data Science',
+AIM:'Artificial Intelligence & Machine Learning', ASE:'Aerospace Engineering', AUT:'Automobile Engineering',
+BIO:'Bio-Technology', CAD:'CSE (Artificial Intelligence & Data Science)', CAI:'Computer Sci. & Engg. (Artificial Intelligence)',
+CBA:'CSE (Big Data Analytics)', CCC:'CSE (Cloud Computing)', CHE:'Chemical Engineering',
+CIA:'CSE (IoT & Automation)', CIC:'CSE (IoT & Cyber Security incl. Blockchain)', CIT:'Computer Science & Information Technology',
+CIV:'Civil Engineering', CS:'Cyber Security', CSB:'Computer Science & Business Systems',
+CSC:'CSE (Cyber Security)', CSD:'CSE (Data Science)', CSE:'Computer Science & Engineering',
+CSEB:'CSE & Business Systems', CSG:'Computer Science & Design', CSM:'CSE (AI & ML)',
+CSO:'CSE (IoT)', CSS:'Computer Science & Systems Engineering', CST:'Computer Science & Technology',
+DS:'Data Science', EBM:'ECE (Bio-Medical Engineering)', ECA:'ECE (Advanced Communication Technology)',
+ECE:'Electronics & Communication Engg', ECM:'Electronics & Computer Engineering', ECT:'Electronics & Communication Technology',
+EEE:'Electrical & Electronics Engg', EIE:'Electronics & Instrumentation Engg', EII:'ECE (Industry Integrated)',
+EVT:'Electronics Engg (VLSI Design & Technology)', GIN:'Geo-Informatics', INF:'Information Technology',
+IOT:'Internet of Things (IoT)', IST:'Instrumentation Engineering & Technology', MEC:'Mechanical Engineering',
+MET:'Metallurgical Engineering', MIN:'Mining Engineering', MMT:'Metallurgy & Material Technology',
+MRB:'Mechanical Engg (Robotics)', NAM:'Naval Architecture & Marine Engg', PEE:'Petroleum Engineering',
+RBT:'Robotics',
+FDT:'Food Technology', PHM:'B.Pharmacy', PHD:'Pharm.D',CSW:'Computer Engineering (Software Engineering)',CSER:'Computer Science and Engineering (Regional Course)',FDE:'Food Engineering',DBT:'Dairy Technology',PET:'PETROLEUM TECHNOLOGY',CBC:'CSE- BLOCK CHAIN',CDA:'CSE- DATA ANALYTICS',ECES:'ELECTRONICS AND COMMUNICATION ENGINEERING -EMBEDDED SYSTEMS',ECV:'ELECTRONICS AND COMMUNICATION ENGINEERING - VLSI DESIGN',MAD:'MECHANICAL AUTOMOTIVE DESIGN',SWE:'SOFTWARE ENGINEERING',GDT:'GAME DESIGN TECHNOLOGY',CN:'COMPUTER NETWORKING',CSBS:'COMPUTER SCIENCE AND BIOSCIENCES',MAU:'MECHANICAL ENGINEERING(AUTOMOBILE)',MII:'MECHANICAL ENGINEERING(INDUSTRY INTEGRATED)',MMM:'MECHANICAL AND MECHTRONICS ENGINEERING (ADDITIVE MANUFACTURING)',PHE:'PHARMACEUTICAL ENGINEERING',ENV:'Environmental Engineering',QC:'Quantum Computing',CSED:'Computer Science and Engineering (Data Science)',DTD:'DIGITAL TECHNIQUES FOR DESIGN AND PLANNING',PLG:'Planning',
+};
+const TYPE_NAMES = { PU:'Private University', PVT:'Private (Affiliated)', SF:'Self-Financing', SS:'Self Supporting', UNIV:'University Campus' };
+const DIST_NAMES = { ATP:'Anantapur', CTR:'Chittoor', EG:'East Godavari', GTR:'Guntur', KDP:'Kadapa (YSR)', KNL:'Kurnool', KRI:'Krishna', NLR:'Nellore (SPSR)', PKS:'Prakasam', SKL:'Srikakulam', VSP:'Visakhapatnam', VZM:'Vizianagaram', WG:'West Godavari' };
+const REGION_NAMES = { AU:'Andhra University region', SVU:'Sri Venkateswara University region', SW:'State-wide (multi-region)' };
+const rankInput = document.getElementById('rankInput');
+const catSelect = document.getElementById('catSelect');
+const genderToggle = document.getElementById('genderToggle');
+const branchSelect = document.getElementById('branchSelect');
+const regionSelect = document.getElementById('regionSelect');
+const distSelect = document.getElementById('distSelect');
+const typeSelect = document.getElementById('typeSelect');
+const nameSearch = document.getElementById('nameSearch');
+const rangeInput = document.getElementById('rangeInput');
+const advToggle = document.getElementById('advToggle');
+const advFields = document.getElementById('advFields');
+const resultsEl = document.getElementById('results');
+const SORT_OPTIONS = [
+{value:'rank25', label:'2025 rank (lowest first)'},
+{value:'rank25_desc', label:'2025 rank (highest first)'},
+{value:'rank24', label:'2024 rank (lowest first)'},
+{value:'closest', label:'Closest to your rank'},
+{value:'trend_tighten', label:'Tightening fastest (25 < 24)'},
+{value:'trend_loosen', label:'Loosening fastest (25 > 24)'},
+{value:'name', label:'Institution name (A–Z)'}
+];
+// per-tier sort selection & open/collapsed state, default sort = 2025 rank ascending
+const tierSort = {top:'rank25', mod:'rank25', safe:'rank25', reach:'rank25'};
+const tierOpen = {top:true, mod:true, safe:true, reach:true};
+// last computed matches, kept for the Excel export
+let lastMatches = [];
+let lastQueryMeta = null;
+function sortMatches(arr, mode, rank){
+const copy = arr.slice();
+copy.sort((a,b)=>{
+if(mode==='rank25') return a.r25 - b.r25;
+if(mode==='rank25_desc') return b.r25 - a.r25;
+if(mode==='rank24') return (a.r24 ?? Infinity) - (b.r24 ?? Infinity);
+if(mode==='closest') return Math.abs(a.r25-rank) - Math.abs(b.r25-rank);
+if(mode==='trend_tighten') return (a.delta ?? 999999) - (b.delta ?? 999999);
+if(mode==='trend_loosen') return (b.delta ?? -999999) - (a.delta ?? -999999);
+if(mode==='name') return a.rec.nm.localeCompare(b.rec.nm);
+return 0;
+});
+return copy;
+}
+resultsEl.addEventListener('change', e=>{
+const sel = e.target.closest('select.tier-sort');
+if(!sel) return;
+tierSort[sel.dataset.tier] = sel.value;
+render();
+});
+resultsEl.addEventListener('toggle', e=>{
+const det = e.target.closest ? e.target.closest('details.tier-section') : null;
+if(!det || det !== e.target) return;
+tierOpen[det.dataset.tier] = det.open;
+}, true);
+resultsEl.addEventListener('click', e=>{
+if(!e.target.closest('#downloadResultsBtn')) return;
+downloadResultsExcel();
+});
+const copyrightYearEl = document.getElementById('copyrightYear');
+if(copyrightYearEl) copyrightYearEl.textContent = new Date().getFullYear();
+let gender = 'b';
+let filtersWired = false;
+advToggle.addEventListener('click', () => {
+advFields.classList.toggle('open');
+advToggle.textContent = advFields.classList.contains('open') ? '– Hide filters' : '+ Filter by branch, region, district or institute';
+});
+genderToggle.addEventListener('click', (e) => {
+const btn = e.target.closest('button');
+if(!btn) return;
+gender = btn.dataset.g;
+[...genderToggle.children].forEach(b => b.classList.toggle('active', b===btn));
+render();
+});
+/* ===================== EXCEL EXPORT ===================== */
+const TIER_LABELS = {top:'Top tier', safe:'Safe', mod:'Good chance', reach:'Reach'};
+const TIER_ORDER = ['top','safe','mod','reach'];
+function trendText(delta){
+if(delta == null) return '—';
+if(delta < -500) return `Tightened ${Math.abs(delta).toLocaleString()}`;
+if(delta > 500) return `Loosened ${delta.toLocaleString()}`;
+return 'Stable';
+}
+function downloadResultsExcel(){
+if(!lastMatches || lastMatches.length===0) return;
+// order rows tier by tier (Top tier, Safe, Good chance, Reach), each tier sorted by 2025 rank ascending
+const rows = [];
+TIER_ORDER.forEach(tier=>{
+const group = lastMatches.filter(m=>m.tag===tier);
+const sorted = sortMatches(group, 'rank25', lastQueryMeta ? lastQueryMeta.rank : 0);
+sorted.forEach(m=>{
+const r = m.rec;
+rows.push({
+'Fit': TIER_LABELS[tier],
+'Institute Code': r.ic,
+'Institution': r.nm,
+'Type': TYPE_NAMES[r.ty] || r.ty || '',
+'District': DIST_NAMES[r.ds] || r.ds || '',
+'Region': r.rg || '',
+'Branch Code': r.br,
+'Branch': BRANCH_NAMES[r.br] || '',
+'2024 Rank': m.r24 != null ? m.r24 : '',
+'2025 Rank': m.r25,
+'Trend': trendText(m.delta),
+'2026 Est.': m.proj != null ? m.proj : ''
+});
+});
+});
+const ws = XLSX.utils.json_to_sheet(rows);
+ws['!cols'] = [
+{wch:12},{wch:12},{wch:42},{wch:16},{wch:14},{wch:8},
+{wch:12},{wch:34},{wch:10},{wch:10},{wch:18},{wch:10}
+];
+const wb = XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(wb, ws, 'Results');
+const meta = lastQueryMeta || {};
+const filenameBits = ['AP-EAPCET-Predictor'];
+if(meta.rank) filenameBits.push('rank-' + meta.rank);
+if(meta.cat) filenameBits.push(meta.cat);
+const filename = filenameBits.join('_') + '.xlsx';
+XLSX.writeFile(wb, filename);
+}
+function initFiltersAndShowApp(meta){
+loadingScreen.style.display = 'none';
+mainApp.style.display = 'block';
+if(meta){
+dataStatus.innerHTML = `<b>Data loaded</b>${meta.count.toLocaleString()} combinations`;
+} else {
+dataStatus.innerHTML = `<b>Data loaded</b>${RAW.length.toLocaleString()} combinations`;
+}
+if(!filtersWired){
+filtersWired = true;
+const branches = {}, dists = new Set(), types = new Set(), regions = new Set();
+RAW.forEach(r => {
+branches[r.br] = (branches[r.br]||0)+1;
+if(r.ds) dists.add(r.ds);
+if(r.ty) types.add(r.ty);
+if(r.rg) regions.add(r.rg);
+});
+Object.keys(branches).sort((a,b)=>branches[b]-branches[a]).forEach(b=>{
+const opt = document.createElement('option');
+opt.value = b;
+opt.textContent = (BRANCH_NAMES[b] ? `${b} — ${BRANCH_NAMES[b]}` : b) + ` (${branches[b]})`;
+branchSelect.appendChild(opt);
+});
+[...dists].sort().forEach(d=>{
+const opt = document.createElement('option');
+opt.value = d;
+opt.textContent = DIST_NAMES[d] ? `${DIST_NAMES[d]} (${d})` : d;
+distSelect.appendChild(opt);
+});
+[...types].sort().forEach(t=>{
+const opt = document.createElement('option');
+opt.value = t;
+opt.textContent = TYPE_NAMES[t] ? `${TYPE_NAMES[t]} (${t})` : t;
+typeSelect.appendChild(opt);
+});
+[...regions].sort().forEach(rg=>{
+const opt = document.createElement('option');
+opt.value = rg;
+opt.textContent = REGION_NAMES[rg] ? `${rg} — ${REGION_NAMES[rg]}` : rg;
+regionSelect.appendChild(opt);
+});
+[rankInput, catSelect, branchSelect, regionSelect, distSelect, typeSelect, rangeInput].forEach(el=>{
+el.addEventListener('input', render);
+el.addEventListener('change', render);
+});
+nameSearch.addEventListener('input', render);
+}
+render();
+}
+function getPair(rec, cat, g){
+const c = rec.c[cat];
+if(!c) return null;
+const r24 = g==='b' ? c.b24 : c.g24;
+const r25 = g==='b' ? c.b25 : c.g25;
+if(r25 == null) return null;
+return {r24, r25};
+}
+function classify(rank, r24, r25, expandBy){
+// Top tier: either year's closing rank falls inside the window just below
+// the user's rank, e.g. rank 10000 with expandBy 3000 -> window [7000, 10000].
+// For ranks below 7000, skip the fixed window entirely and treat every
+// rank from 0 up to the user's rank as top tier.
+const LOW_RANK_THRESHOLD = 7000;
+if(rank < LOW_RANK_THRESHOLD || expandBy > 0){
+const start = rank < LOW_RANK_THRESHOLD ? 0 : rank - expandBy;
+const end = rank;
+const nearIn24 = r24 != null && r24 >= start && r24 <= end;
+const nearIn25 = r25 != null && r25 >= start && r25 <= end;
+if(nearIn24 || nearIn25) return 'top';
+}
+const ratio = rank / r25;
+if(ratio <= 0.72) return 'safe';
+if(ratio <= 1.0) return 'mod';
+if(ratio <= 1.18) return 'reach';
+return null;
+}
+function projected2026(r24, r25){
+if(r24 == null) return null;
+const delta = r25 - r24;
+return Math.max(1, Math.round(r25 + delta*0.5));
+}
+function render(){
+if(!RAW) return;
+const rank = parseInt(rankInput.value, 10);
+const cat = catSelect.value;
+const branchF = branchSelect.value;
+const regionF = regionSelect.value;
+const distF = distSelect.value;
+const typeF = typeSelect.value;
+const nameF = nameSearch.value.trim().toLowerCase();
+const expandBy = Math.max(0, parseInt(rangeInput.value, 10) || 0);
+if(!rank || rank <= 0){
+resultsEl.innerHTML = `<div class="cta-init"><div class="big">Enter your rank to begin</div>Type your EAPCET rank above and we'll show every college &amp; branch where it realistically counts.</div>`;
+lastMatches = [];
+lastQueryMeta = null;
+return;
+}
+let matches = [];
+RAW.forEach(rec=>{
+if(branchF && rec.br !== branchF) return;
+if(regionF && rec.rg !== regionF) return;
+if(distF && rec.ds !== distF) return;
+if(typeF && rec.ty !== typeF) return;
+if(nameF && !(rec.nm.toLowerCase().includes(nameF) || rec.ic.toLowerCase().includes(nameF))) return;
+const pair = getPair(rec, cat, gender);
+if(!pair) return;
+const tag = classify(rank, pair.r24, pair.r25, expandBy);
+if(!tag) return;
+matches.push({
+rec, r24: pair.r24, r25: pair.r25, tag,
+proj: projected2026(pair.r24, pair.r25),
+delta: (pair.r24!=null) ? pair.r25 - pair.r24 : null
+});
+});
+if(matches.length === 0){
+resultsEl.innerHTML = `<div class="empty"><div class="big">No realistic matches found</div>Try a different category, or clear branch/region/district filters — your rank may fall outside what's on offer for this combination.</div>`;
+lastMatches = [];
+lastQueryMeta = null;
+return;
+}
+lastMatches = matches;
+lastQueryMeta = {rank, cat};
+const groups = {top:[], safe:[], mod:[], reach:[]};
+matches.forEach(m=>groups[m.tag].push(m));
+const counts = `Top tier <b>${groups.top.length}</b> · Safe <b>${groups.safe.length}</b> · Good chance <b>${groups.mod.length}</b> · Reach <b>${groups.reach.length}</b> · Total <b>${matches.length}</b>`;
+const catLabel = catSelect.options[catSelect.selectedIndex] ? catSelect.options[catSelect.selectedIndex].text : cat;
+const genderLabel = gender === 'b' ? 'Boys' : 'Girls';
+const regionLabel = regionF ? (REGION_NAMES[regionF] ? `${regionF} — ${REGION_NAMES[regionF]}` : regionF) : 'All regions';
+const branchLabel = branchF ? (BRANCH_NAMES[branchF] || branchF) : null;
+const printCriteria = `<b>AP EAPCET College Predictor</b> — Rank <b>${rank.toLocaleString()}</b> · ${catLabel} · ${genderLabel} · ${regionLabel}${branchLabel ? ' · ' + branchLabel : ''}<br>${counts}`;
+let html = `<div class="print-summary">${printCriteria}</div>
+<div class="summary-bar">${counts}
+<div class="legend">
+<span><span class="dot" style="background:var(--top)"></span>Top tier</span>
+<span><span class="dot" style="background:var(--safe)"></span>Safe</span>
+<span><span class="dot" style="background:var(--mod)"></span>Good chance</span>
+<span><span class="dot" style="background:var(--reach)"></span>Reach</span>
+</div>
+<button class="print-btn" id="downloadResultsBtn">Download results</button>
+</div>`;
+const sectionMeta = {
+top: {title:'Top tier — closest to your rank', note: rank < 7000 ? `Your rank is under 7,000, so every closing rank from 0–${rank.toLocaleString()} counts here — no 3,000 window applied.` : (expandBy > 0 ? `Either year's closing rank landed within ${expandBy.toLocaleString()} of your rank (${Math.max(0, rank-expandBy).toLocaleString()}–${rank.toLocaleString()}) — your strongest, most realistic matches.` : 'Nearest matches to your rank.')},
+mod: {title:'Good chance', note:'Your rank is within the 2025 closing rank — a solid, realistic target.'},
+safe: {title:'Safe bets', note:'Your rank comfortably beat the 2025 closing rank — very likely a seat here.'},
+reach: {title:'Reach — worth trying', note:'You are right around the 2025 cutoff. Possible if this year loosens, or in later counselling rounds.'}
+};
+['top','mod','safe','reach'].forEach(key=>{
+if(groups[key].length === 0) return;
+const meta = sectionMeta[key];
+const currentSort = tierSort[key] || 'rank25';
+const isOpen = tierOpen[key] !== false;
+const sorted = sortMatches(groups[key], currentSort, rank);
+const optionsHtml = SORT_OPTIONS.map(o=>`<option value="${o.value}"${o.value===currentSort?' selected':''}>${o.label}</option>`).join('');
+html += `<details class="tier-section" data-tier="${key}" ${isOpen ? 'open' : ''}>
+<summary class="section-head"><h2>${meta.title}</h2><span class="count">${groups[key].length}</span><span class="chevron">▶</span></summary>
+<div class="section-note">${meta.note}</div>
+<div class="section-toolbar">
+<span></span>
+<label class="tier-sort-field">Sort by
+<select class="tier-sort" data-tier="${key}">${optionsHtml}</select>
+</label>
+</div>
+<table><thead><tr>
+<th>Institution</th><th>Branch</th><th>2024 rank</th><th>2025 rank</th><th>Trend</th><th>2026 est.</th><th>Fit</th>
+</tr></thead><tbody>`;
+sorted.slice(0, 400).forEach(m=>{
+const r = m.rec;
+const branchLabel = BRANCH_NAMES[r.br] || '';
+const typeLabel = TYPE_NAMES[r.ty] || r.ty || '';
+const distLabel = DIST_NAMES[r.ds] || r.ds || '';
+const regionLabel = r.rg || '';
+let trendHtml = '<span class="trend flat">—</span>';
+if(m.delta != null){
+if(m.delta < -500) trendHtml = `<span class="trend down">▼ tightened ${Math.abs(m.delta).toLocaleString()}</span>`;
+else if(m.delta > 500) trendHtml = `<span class="trend up">▲ loosened ${m.delta.toLocaleString()}</span>`;
+else trendHtml = `<span class="trend flat">≈ stable</span>`;
+}
+const projHtml = m.proj != null ? `<span class="proj">~${m.proj.toLocaleString()}</span>` : `<span class="proj">—</span>`;
+const tagLabel = key==='top' ? 'Top tier' : key==='safe' ? 'Safe' : key==='mod' ? 'Good chance' : 'Reach';
+html += `<tr>
+<td data-label="Institution"><div class="inst-name"><span class="code-pill">${r.ic}</span>${r.nm}</div><div class="inst-meta">${regionLabel ? `<span class="region-pill">${regionLabel}</span>` : ''}${distLabel}${typeLabel ? ' · '+typeLabel : ''}</div></td>
+<td data-label="Branch"><span class="branch-pill">${r.br}</span><div class="inst-meta">${branchLabel}</div></td>
+<td data-label="2024 rank" class="rank-num">${m.r24!=null ? m.r24.toLocaleString() : '—'}</td>
+<td data-label="2025 rank" class="rank-num">${m.r25.toLocaleString()}</td>
+<td data-label="Trend">${trendHtml}</td>
+<td data-label="2026 est.">${projHtml}</td>
+<td data-label="Fit"><span class="tag ${key}">${tagLabel}</span></td>
+</tr>`;
+});
+html += `</tbody></table></details>`;
+});
+resultsEl.innerHTML = html;
+}
+</script>
+</body>
+</html>
