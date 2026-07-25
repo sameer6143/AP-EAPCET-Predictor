@@ -62,9 +62,8 @@ background:var(--paper); color:var(--ink); font-family:var(--mono); font-size:14
 .toggle-row{ display:flex; gap:8px; }
 .toggle-row button{ flex:1; padding:10px 8px; border:1px solid var(--line); background:var(--paper); border-radius:4px; font-family:var(--mono); font-size:13px; font-weight:600; color:var(--ink-soft); cursor:pointer; }
 .toggle-row button.active{ background:var(--ink); color:#fff; border-color:var(--ink); }
-.adv-toggle{ margin-top:16px; font-size:12.5px; color:var(--gold); font-weight:700; cursor:pointer; display:inline-block; border-bottom:1px dotted var(--gold); }
-.adv-fields{ display:none; margin-top:16px; padding-top:16px; border-top:1px dashed var(--line); }
-.adv-fields.open{ display:grid; }
+/* Advanced filters are now always visible (no hidden/collapsed state) */
+.adv-fields{ display:grid; margin-top:16px; padding-top:16px; border-top:1px dashed var(--line); }
 .summary-bar{ display:flex; gap:18px; flex-wrap:wrap; margin-bottom:18px; font-size:13px; color:var(--ink-soft); align-items:center; }
 .summary-bar b{ color:var(--ink); }
 .legend{ display:flex; gap:14px; flex-wrap:wrap; font-size:12px; margin-left:auto; }
@@ -497,8 +496,6 @@ const distSelect = document.getElementById('distSelect');
 const typeSelect = document.getElementById('typeSelect');
 const nameSearch = document.getElementById('nameSearch');
 const rangeInput = document.getElementById('rangeInput');
-const advToggle = document.getElementById('advToggle');
-const advFields = document.getElementById('advFields');
 const resultsEl = document.getElementById('results');
 const SORT_OPTIONS = [
 {value:'rank25', label:'2025 rank (lowest first)'},
@@ -548,9 +545,6 @@ const copyrightYearEl = document.getElementById('copyrightYear');
 if(copyrightYearEl) copyrightYearEl.textContent = new Date().getFullYear();
 let gender = 'b';
 let filtersWired = false;
-advToggle.addEventListener('click', () => {
-advFields.classList.toggle('open');
-});
 genderToggle.addEventListener('click', (e) => {
 const btn = e.target.closest('button');
 if(!btn) return;
