@@ -738,7 +738,7 @@ let html = `<div class="print-summary">${printCriteria}</div>
 <span><span class="dot" style="background:var(--mod)"></span>Good chance</span>
 <span><span class="dot" style="background:var(--reach)"></span>Reach</span>
 </div>
-<button class="print-btn" id="downloadResultsBtn">Download results</button>
+<button class="print-btn" id="downloadResultsBtn">⬇️Download results</button>
 </div>`;
 const sectionMeta = {
 top: {title:'Top tier — closest to your rank', note: rank < 7000 ? `Your rank is under 7,000, so every closing rank from 0–${rank.toLocaleString()} counts here — no 3,000 window applied.` : (expandBy > 0 ? `Either year's closing rank landed within ${expandBy.toLocaleString()} of your rank (${Math.max(0, rank-expandBy).toLocaleString()}–${rank.toLocaleString()}) — your strongest, most realistic matches.` : 'Nearest matches to your rank.')},
